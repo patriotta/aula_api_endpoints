@@ -64,18 +64,25 @@ app.get('/produtos/:id', (req, res) => {
 
 // CRIAR PRODUTO
 app.post('/produtos', (req, res) => {
-
     const { nome, preco } = req.body;
 
-    if (!nome || !preco) {
+    // Validação do nome
+    if (!nome || typeof nome !== 'string' || nome.trim() === '') {
         return res.status(400).json({
-            erro: 'Nome e preço são obrigatórios'
+            erro: 'Nome é obrigatório e deve ser válido'
+        });
+    }
+
+    // Validação do preço
+    if (preco === undefined || typeof preco !== 'number' || preco <= 0) {
+        return res.status(400).json({
+            erro: 'Preço deve ser um número maior que 0'
         });
     }
 
     const novoProduto = {
         id: proximoId++,
-        nome,
+        nome: nome.trim(),
         preco
     };
 
@@ -86,7 +93,6 @@ app.post('/produtos', (req, res) => {
 
 // ATUALIZAR PRODUTO
 app.put('/produtos/:id', (req, res) => {
-
     const id = parseInt(req.params.id);
     const { nome, preco } = req.body;
 
@@ -98,8 +104,23 @@ app.put('/produtos/:id', (req, res) => {
         });
     }
 
-    produto.nome = nome;
-    produto.preco = preco;
+    if (nome !== undefined) {
+        if (typeof nome !== 'string' || nome.trim() === '') {
+            return res.status(400).json({
+                erro: 'Nome inválido'
+            });
+        }
+        produto.nome = nome.trim();
+    }
+
+    if (preco !== undefined) {
+        if (typeof preco !== 'number' || preco <= 0) {
+            return res.status(400).json({
+                erro: 'Preço inválido'
+            });
+        }
+        produto.preco = preco;
+    }
 
     res.json(produto);
 });
